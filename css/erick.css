@@ -1,0 +1,172 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+header {
+    padding: 0.7rem 1.5rem;
+}
+
+header nav {
+    background-color: var(--bg-sec);
+    border-radius: 1.2rem;
+    padding: 0.4rem 1.5rem;
+    gap: 1rem;
+    max-width: 100%;
+}
+
+header nav img {
+    width: 3.4rem;
+    height: 3.4rem;
+    padding: 0.3rem;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: var(--acento);
+}
+
+.buscador-contenedor input {
+    font-size: 1rem;
+    padding: 0.45rem 1.2rem;
+    border-radius: 1.2rem;
+    border: none;
+    outline: none;
+}
+
+#buscador {
+    background-color: var(--bg-color);
+    color: var(--fc-color);
+    font-size: 1rem;
+    padding: 0.45rem 1.2rem;
+    border-radius: 1.2rem;
+    border: 1px solid var(--acento-2);
+    text-align: left;
+    width: 100%;
+    max-width: 300px;
+    min-width: 0;
+    margin-top: 0;
+}
+
+#buscador::placeholder {
+    color: var(--fc-color);
+    opacity: 0.65;
+}
+
+#buscador:focus {
+    outline: none;
+    border-color: var(--acento);
+}
+
+#contedorGeneral {
+    display: flex;
+    align-items: stretch;
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+#menu-horizontal {
+    position: relative;
+    flex-shrink: 0;
+}
+
+#menu-horizontal .btn-cuenta {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0.6rem;
+    background-color: var(--acento);
+    color: var(--bg-color);
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: bold;
+}
+
+#menu-horizontal div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1rem 0.6rem;
+}
+
+#menu-horizontal div a {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 0.6rem;
+    white-space: normal;
+    word-break: break-word;
+}
+
+#contenido {
+    flex: 1;
+    min-width: 0;
+    overflow-x: hidden;
+    box-sizing: border-box;
+}
+
+#productos {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    padding: 2rem 2.5rem;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.producto {
+    background-color: var(--bg-sec);
+    color: var(--fc-color);
+    min-height: 15rem;
+    min-width: 0;
+    padding: 1.1rem;
+    border-radius: 0.9rem;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.imagen-producto {
+    width: 100%;
+    height: 6.5rem;
+    background-color: var(--acento);
+    border-radius: 0.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 0.8rem;
+}
+
+.imagen-producto img {
+    width: 5.5rem;
+    height: 5rem;
+    object-fit: contain;
+}
+
+.producto h2 {
+    font-size: 1.2rem;
+    margin-bottom: 0.4rem;
+}
+
+.producto p {
+    font-size: 0.9rem;
+    line-height: 1.35;
+    text-align: center;
+    margin-bottom: 0.7rem;
+}
+
+.producto a {
+    color: var(--fc-color);
+    font-size: 0.9rem;
+    text-decoration: underline;
+}
+
+.producto a:hover {
+    color: var(--acento-2);
+}
