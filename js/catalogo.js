@@ -45,7 +45,7 @@ const productos = [
         price: 58,
         description: 'Bebida fría licuada con textura espesa tipo granizado.',
         hechoDe: 'Café, hielo triturado, leche y base cremosa licuada.',
-        img: FOTO_CAFE
+        img: FOTO_ESPRESSO
     },
     {
         name: 'Milkshake',
@@ -130,7 +130,7 @@ function abrirModal(item) {
                 <h2 style="margin:0; font-size:20px; color:#ffffff;">${item.name}</h2>
                 <button id="mCerrar" type="button" style="background:#4a3728; color:#ffffff; border:none; border-radius:8px; padding:6px 12px; cursor:pointer; font-size:16px;">✕</button>
             </div>
-            <img src="${item.img}" alt="${item.name}" style="width:100%; height:200px; object-fit:cover; border-radius:10px; margin-bottom:12px; display:block;">
+            <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='${FOTO_CAFE}';" style="width:100%; height:200px; object-fit:cover; border-radius:10px; margin-bottom:12px; display:block;">
             <p style="margin:0 0 10px 0; color:#f0e6dc; line-height:1.45;">${item.description}</p>
             <p style="margin:0 0 10px 0; color:#ffffff; line-height:1.45;"><strong>De qué está hecho:</strong> ${item.hechoDe}</p>
             <p style="margin:0 0 6px 0; color:#ffd57e; font-size:16px;"><strong>Precio:</strong> $${item.price} MXN</p>
@@ -162,7 +162,7 @@ function pintarTarjetas(items) {
 
         card.innerHTML = `
             <div class="imagen-producto">
-                <img src="${item.img}" alt="${item.name}" style="width:100%; height:100%; object-fit:cover; border-radius:0.4rem;">
+                <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='${FOTO_CAFE}';" style="width:100%; height:100%; object-fit:cover; border-radius:0.4rem;">
             </div>
             <h2>${item.name}</h2>
             <p>${item.description}</p>
