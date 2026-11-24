@@ -19,6 +19,14 @@ function obtenerRutaBase() {
     return window.location.pathname.includes("/html/") ? "../" : "./";
 }
 
+function irAInicio() {
+    if (window.location.pathname.includes("/html/")) {
+        window.location.href = "inicio.html";
+    } else {
+        window.location.href = "html/inicio.html";
+    }
+}
+
 function inicializarUsuarios() {
     let usuarios = JSON.parse(localStorage.getItem("usuarios"));
 
@@ -81,7 +89,7 @@ function iniciarSesion(e) {
     if (usuarioEncontrado) {
         if (errorMsg) errorMsg.hidden = true;
         sessionStorage.setItem("sesionActiva", JSON.stringify(usuarioEncontrado));
-        window.location.href = `${obtenerRutaBase()}html/inicio.html`;
+        irAInicio();
     } else if (errorMsg) {
         errorMsg.hidden = false;
     }
@@ -99,7 +107,7 @@ function obtenerUsuarioSesion() {
 function saltarLoginSiAutenticado() {
     const sesion = sessionStorage.getItem("sesionActiva");
     if (sesion) {
-        window.location.href = `${obtenerRutaBase()}html/inicio.html`;
+        irAInicio();
     }
 }
 
