@@ -83,21 +83,18 @@ header nav img:hover {
 #menu-horizontal {
     position: relative;
     flex-shrink: 0;
-    min-height: calc(100vh - 5.5rem);
 }
 
 #menu-horizontal .btn-cuenta {
-    position: fixed;
-    bottom: 1rem;
-    left: 1rem;
-    z-index: 999;
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0.6rem;
     background-color: var(--acento);
     color: var(--bg-color);
-    padding: 0.45rem 0.95rem;
+    padding: 0.45rem 0.9rem;
     border-radius: 0.8rem;
     font-size: 0.9rem;
     font-weight: bold;
-    text-decoration: none;
     transition: transform 0.2s ease, filter 0.2s ease;
 }
 
