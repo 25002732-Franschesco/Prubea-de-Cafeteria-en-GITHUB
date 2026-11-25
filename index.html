@@ -39,6 +39,7 @@
     </section>
 
     <script src="./js/login.js"></script>
+    <script src="./js/roles.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             saltarLoginSiAutenticado();
@@ -46,10 +47,12 @@
             const formulario = document.getElementById("formulario");
             const errorMsg = document.getElementById("errorMsg");
 
-            formulario.addEventListener("submit", iniciarSesion);
-            formulario.addEventListener("input", () => {
-                if (errorMsg) errorMsg.hidden = true;
-            });
+            if (formulario) {
+                formulario.addEventListener("submit", iniciarSesion);
+                formulario.addEventListener("input", () => {
+                    if (errorMsg) errorMsg.hidden = true;
+                });
+            }
         });
     </script>
 

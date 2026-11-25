@@ -2,8 +2,10 @@ const contenedor = document.getElementById('productos');
 const buscador = document.getElementById('buscador');
 
 const IMAGEN_RESPALDO = '../imagenes/coffee-latte.jpg';
+const STORAGE_PRODUCTOS_KEY = 'catalogoProductos';
+const ROLES_CON_GESTION = ['trabajador', 'admin', 'jefe'];
 
-const productos = [
+const productosBase = [
     {
         name: 'Coffee latte',
         category: 'cafe',
@@ -110,10 +112,55 @@ const productos = [
     }
 ];
 
+function obtenerRolActualCatalogo() {
+    try {
+        const sesion = JSON.parse(sessionStorage.getItem('sesionActiva'));
+        if (sesion && sesion.rol) {
+            return String(sesion.rol).toLowerCase().trim();
+        }
+    } catch {
+        // Ignora error de parseo
+    }
+    const rolLocal = localStorage.getItem('rolUsuario');
+    return rolLocal ? rolLocal.toLowerCase().trim() : '';
+}
+
+function puedeGestionarCatalogo() {
+    const rol = obtenerRolActualCatalogo();
+    return ROLES_CON_GESTION.includes(rol);
+}
+
+function cargarProductos() {
+    try {
+        const guardados = JSON.parse(localStorage.getItem(STORAGE_PRODUCTOS_KEY));
+        if (Array.isArray(guardados) && guardados.length > 0) {
+            return guardados;
+        }
+    } catch {
+        // Usa productosBase si falla el parseo
+    }
+    localStorage.setItem(STORAGE_PRODUCTOS_KEY, JSON.stringify(productosBase));
+    return productosBase.slice();
+}
+
+function guardarProductos(lista) {
+    localStorage.setItem(STORAGE_PRODUCTOS_KEY, JSON.stringify(lista));
+}
+
+function eliminarProducto(indice) {
+    if (!puedeGestionarCatalogo()) return;
+    if (indice < 0 || indice >= productos.length) return;
+    productos.splice(indice, 1);
+    guardarProductos(productos);
+    cerrarModal();
+    filtrarCatalogo();
+}
+
+let productos = cargarProductos();
 let filtroActual = 'todos';
 
 const modal = document.createElement('div');
-modal.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(12, 8, 6, 0.82); backdrop-filter:blur(4px); z-index:99999; justify-content:center; align-items:center; padding:18px; box-sizing:border-box;';
+modal.style.cssText = 'display:none; position:fixed; inset:0; background:rgba(0, 0, 0, 0.7); z-index:99999; justify-content:center; align-items:center; padding:16px; box-sizing:border-box;';
 document.body.appendChild(modal);
 
 function cerrarModal() {
@@ -130,62 +177,136 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-function abrirModal(item) {
+function abrirModal(item, indice) {
+    const gestion = puedeGestionarCatalogo();
+
     modal.innerHTML = `
-        <div style="background:linear-gradient(180deg, #2b211c 0%, #1f1714 100%); color:#ffffff; border:1px solid rgba(212, 163, 115, 0.45); border-radius:18px; max-width:460px; width:100%; padding:20px; box-sizing:border-box; font-family:inherit; max-height:90vh; overflow-y:auto; box-shadow:0 24px 60px rgba(0, 0, 0, 0.65);">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px;">
+        <div style="background:var(--bg-sec, #241b16); color:var(--fc-color, #ffffff); border:1px solid var(--acento-2, #d4a373); border-radius:10px; max-width:440px; width:100%; padding:18px; box-sizing:border-box; font-family:inherit; max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
                 <div>
-                    <span style="display:inline-block; background:rgba(166, 124, 82, 0.22); color:#e6be8a; border:1px solid rgba(212, 163, 115, 0.35); border-radius:999px; padding:3px 10px; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:6px;">
-                        ${item.category}
-                    </span>
-                    <h2 style="margin:0; font-size:22px; font-weight:700; color:#fff8f0; line-height:1.2;">${item.name}</h2>
+                    <small style="color:var(--acento-2, #d4a373);">${item.category}</small>
+                    <h2 style="margin:2px 0 0 0; font-size:20px;">${item.name}</h2>
                 </div>
-                <button id="mCerrar" type="button" aria-label="Cerrar" style="background:#3a2c24; color:#f5e9dc; border:1px solid rgba(255,255,255,0.1); border-radius:10px; width:36px; height:36px; flex-shrink:0; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; transition:background 0.2s ease;">✕</button>
+                <button id="mCerrar" type="button" style="background:none; color:inherit; border:1px solid rgba(255,255,255,0.2); border-radius:6px; width:30px; height:30px; cursor:pointer;">✕</button>
             </div>
 
-            <div style="background:linear-gradient(145deg, #b6895b, #8d633b); border-radius:14px; padding:16px; margin-bottom:16px; display:flex; justify-content:center; align-items:center; min-height:155px; box-shadow:inset 0 1px 0 rgba(255,255,255,0.22);">
-                <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='${IMAGEN_RESPALDO}';" style="max-width:100%; max-height:135px; width:auto; height:auto; object-fit:contain; display:block; filter:drop-shadow(0 8px 14px rgba(0,0,0,0.28));">
+            <div style="background:var(--acento, #a67c52); border-radius:8px; padding:12px; margin-bottom:12px; display:flex; justify-content:center; align-items:center; height:140px;">
+                <img src="${item.img}" alt="${item.name}" onerror="this.onerror=null;this.src='${IMAGEN_RESPALDO}';" style="max-width:100%; max-height:100%; width:auto; height:auto; object-fit:contain; display:block;">
             </div>
 
-            <p style="margin:0 0 14px 0; color:#efe3d6; font-size:14.5px; line-height:1.55;">
-                ${item.description}
-            </p>
+            <p style="margin:0 0 10px 0; font-size:14px;">${item.description}</p>
+            <p style="margin:0 0 14px 0; font-size:13.5px;"><strong>De qué está hecho:</strong> ${item.hechoDe}</p>
 
-            <div style="background:rgba(255, 255, 255, 0.04); border:1px solid rgba(255, 255, 255, 0.08); border-radius:12px; padding:12px 14px; margin-bottom:16px;">
-                <div style="font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; color:#e6be8a; margin-bottom:4px;">
-                    De qué está hecho
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px;">
+                <strong style="font-size:18px; color:var(--acento-2, #d4a373);">$${item.price} MXN</strong>
+                <div style="display:flex; gap:8px;">
+                    ${gestion ? `<button id="mEliminar" type="button" style="background:#7f2323; color:#ffffff; border:none; border-radius:6px; padding:7px 12px; cursor:pointer;">Eliminar</button>` : ''}
+                    <button id="mCerrarSec" type="button" style="background:var(--acento, #a67c52); color:var(--bg-color, #140f0c); border:none; border-radius:6px; padding:7px 14px; font-weight:bold; cursor:pointer;">Cerrar</button>
                 </div>
-                <p style="margin:0; color:#ffffff; font-size:14px; line-height:1.5;">
-                    ${item.hechoDe}
-                </p>
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; padding-top:12px; border-top:1px solid rgba(255, 255, 255, 0.1);">
-                <div>
-                    <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.05em; color:#cbbba8;">Precio</div>
-                    <div style="color:#ffd57e; font-size:21px; font-weight:800; line-height:1.15;">$${item.price} <span style="font-size:12px; font-weight:600;">MXN</span></div>
-                </div>
-                <button id="mCerrarSec" type="button" style="background:#a67c52; color:#1b130f; border:none; border-radius:10px; padding:9px 16px; cursor:pointer; font-size:13.5px; font-weight:700;">
-                    Listo
-                </button>
             </div>
         </div>
     `;
 
-    const btnCerrar = document.getElementById('mCerrar');
-    const btnCerrarSec = document.getElementById('mCerrarSec');
+    document.getElementById('mCerrar').addEventListener('click', cerrarModal);
+    document.getElementById('mCerrarSec').addEventListener('click', cerrarModal);
 
-    btnCerrar.addEventListener('click', cerrarModal);
-    btnCerrarSec.addEventListener('click', cerrarModal);
+    const btnEliminarModal = document.getElementById('mEliminar');
+    if (btnEliminarModal) {
+        btnEliminarModal.addEventListener('click', () => eliminarProducto(indice));
+    }
 
-    btnCerrar.addEventListener('mouseenter', () => {
-        btnCerrar.style.background = '#533f33';
-    });
-    btnCerrar.addEventListener('mouseleave', () => {
-        btnCerrar.style.background = '#3a2c24';
+    modal.style.display = 'flex';
+}
+
+function abrirModalSubirProducto() {
+    if (!puedeGestionarCatalogo()) return;
+
+    modal.innerHTML = `
+        <div style="background:var(--bg-sec, #241b16); color:var(--fc-color, #ffffff); border:1px solid var(--acento-2, #d4a373); border-radius:10px; max-width:440px; width:100%; padding:18px; box-sizing:border-box; font-family:inherit; max-height:90vh; overflow-y:auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:12px;">
+                <h2 style="margin:0; font-size:18px;">Subir producto</h2>
+                <button id="mCerrarSubir" type="button" style="background:none; color:inherit; border:1px solid rgba(255,255,255,0.2); border-radius:6px; width:30px; height:30px; cursor:pointer;">✕</button>
+            </div>
+
+            <form id="formSubirProducto" style="display:flex; flex-direction:column; gap:10px;">
+                <div>
+                    <label style="display:block; font-size:13px; margin-bottom:4px;">Nombre</label>
+                    <input id="npNombre" type="text" required style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;">
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="display:block; font-size:13px; margin-bottom:4px;">Categoría</label>
+                        <select id="npCategoria" style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;">
+                            <option value="cafe">cafe</option>
+                            <option value="frios">frios</option>
+                            <option value="postres">postres</option>
+                            <option value="pan">pan</option>
+                            <option value="salados">salados</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:13px; margin-bottom:4px;">Precio</label>
+                        <input id="npPrecio" type="number" min="1" required style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;">
+                    </div>
+                </div>
+                <div>
+                    <label style="display:block; font-size:13px; margin-bottom:4px;">Descripción</label>
+                    <textarea id="npDescripcion" rows="2" required style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;"></textarea>
+                </div>
+                <div>
+                    <label style="display:block; font-size:13px; margin-bottom:4px;">De qué está hecho</label>
+                    <input id="npHechoDe" type="text" required style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;">
+                </div>
+                <div>
+                    <label style="display:block; font-size:13px; margin-bottom:4px;">Ruta de imagen (opcional)</label>
+                    <input id="npImg" type="text" placeholder="../icons/coffee-latte.svg" style="width:100%; padding:7px 9px; border-radius:6px; border:1px solid rgba(255,255,255,0.2); background:var(--bg-color, #140f0c); color:inherit; box-sizing:border-box;">
+                </div>
+                <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:6px;">
+                    <button id="npCancelar" type="button" style="background:rgba(255,255,255,0.12); color:inherit; border:none; border-radius:6px; padding:7px 12px; cursor:pointer;">Cancelar</button>
+                    <button type="submit" style="background:var(--acento, #a67c52); color:var(--bg-color, #140f0c); border:none; border-radius:6px; padding:7px 14px; font-weight:bold; cursor:pointer;">Guardar</button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.getElementById('mCerrarSubir').addEventListener('click', cerrarModal);
+    document.getElementById('npCancelar').addEventListener('click', cerrarModal);
+
+    document.getElementById('formSubirProducto').addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const nuevo = {
+            name: document.getElementById('npNombre').value.trim(),
+            category: document.getElementById('npCategoria').value,
+            price: Number(document.getElementById('npPrecio').value),
+            description: document.getElementById('npDescripcion').value.trim(),
+            hechoDe: document.getElementById('npHechoDe').value.trim(),
+            img: document.getElementById('npImg').value.trim() || IMAGEN_RESPALDO
+        };
+
+        if (!nuevo.name || Number.isNaN(nuevo.price) || nuevo.price <= 0) return;
+
+        productos.push(nuevo);
+        guardarProductos(productos);
+        cerrarModal();
+        filtrarCatalogo();
     });
 
     modal.style.display = 'flex';
+}
+
+function crearBotonFlotanteSubir() {
+    if (!puedeGestionarCatalogo()) return;
+    if (document.getElementById('btnSubirProducto')) return;
+
+    const btn = document.createElement('button');
+    btn.id = 'btnSubirProducto';
+    btn.type = 'button';
+    btn.textContent = '+ Subir producto';
+    btn.style.cssText = 'position:fixed; right:20px; bottom:20px; z-index:9998; background:var(--acento, #a67c52); color:var(--bg-color, #140f0c); border:none; border-radius:8px; padding:10px 14px; font-size:14px; font-weight:bold; cursor:pointer;';
+
+    btn.addEventListener('click', abrirModalSubirProducto);
+    document.body.appendChild(btn);
 }
 
 function pintarTarjetas(items) {
@@ -196,9 +317,11 @@ function pintarTarjetas(items) {
         return;
     }
 
+    const gestion = puedeGestionarCatalogo();
     contenedor.innerHTML = '';
 
     items.forEach(item => {
+        const indiceReal = productos.indexOf(item);
         const card = document.createElement('article');
         card.className = 'producto';
         card.style.cursor = 'pointer';
@@ -210,13 +333,25 @@ function pintarTarjetas(items) {
             <h2>${item.name}</h2>
             <p>${item.description}</p>
             <p><strong>$${item.price}</strong></p>
-            <a href="#" class="ver-detalles">Más detalles</a>
+            <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:auto; width:100%;">
+                <a href="#" class="ver-detalles">Más detalles</a>
+                ${gestion ? `<button type="button" class="btn-eliminar-prod" style="background:#7f2323; color:#ffffff; border:none; border-radius:6px; padding:4px 8px; font-size:12px; cursor:pointer;">Eliminar</button>` : ''}
+            </div>
         `;
 
         card.addEventListener('click', (e) => {
+            if (e.target.closest('.btn-eliminar-prod')) return;
             e.preventDefault();
-            abrirModal(item);
+            abrirModal(item, indiceReal);
         });
+
+        const btnEliminar = card.querySelector('.btn-eliminar-prod');
+        if (btnEliminar) {
+            btnEliminar.addEventListener('click', (e) => {
+                e.stopPropagation();
+                eliminarProducto(indiceReal);
+            });
+        }
 
         contenedor.appendChild(card);
     });
@@ -250,4 +385,5 @@ document.querySelectorAll('[data-filter]').forEach(btn => {
     });
 });
 
+crearBotonFlotanteSubir();
 filtrarCatalogo();
